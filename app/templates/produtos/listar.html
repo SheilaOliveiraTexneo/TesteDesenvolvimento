@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+
+{% block title %}Produtos - Sistema de Estoque{% endblock %}
+{% block page_title %}Gerenciamento de Produtos{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-box"></i> Produtos</h5>
+        <a href="{{ url_for('produtos.novo') }}" class="btn btn-sm btn-success">
+            <i class="bi bi-plus-circle"></i> Novo Produto
+        </a>
+    </div>
+    
+    <div class="card-body">
+        <!-- Filtros e Busca -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="GET" action="{{ url_for('produtos.listar') }}" class="d-flex gap-2">
+                    <div class="search-box flex-grow-1">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" class="form-control" placeholder="Buscar por código ou descrição..." value="{{ search }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" onchange="location.href='{{ url_for('produtos.listar') }}?sort=' + this.value + '&order={{ order }}'">
+                    <option value="codigo" {% if sort_by == 'codigo' %}selected{% endif %}>Ordenar por Código</option>
+                    <option value="descricao" {% if sort_by == 'descricao' %}selected{% endif %}>Ordenar por Descrição</option>
+                    <option value="data_criacao" {% if sort_by == 'data_criacao' %}selected{% endif %}>Ordenar por Data</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" onchange="location.href='{{ url_for('produtos.listar') }}?sort={{ sort_by }}&order=' + this.value">
+                    <option value="asc" {% if order == 'asc' %}selected{% endif %}>Crescente</option>
+                    <option value="desc" {% if order == 'desc' %}selected{% endif %}>Decrescente</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabela -->
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Código</th>
+                    <th>Descrição</th>
+                    <th>Foto</th>
+                    <th>Data de Criação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if produtos %}
+                    {% for produto in produtos %}
+                    <tr>
+                        <td><strong>{{ produto.codigo }}</strong></td>
+                        <td>{{ produto.descricao }}</td>
+                        <td>
+                            {% if produto.foto %}
+                                <img src="/static/uploads/{{ produto.foto }}" alt="{{ produto.codigo }}" style="height: 30px; border-radius: 3px;">
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ produto.data_criacao.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                        <td>
+                            <a href="{{ url_for('produtos.editar', id=produto.id) }}" class="btn btn-sm btn-warning btn-action">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form method="POST" action="{{ url_for('produtos.deletar', id=produto.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este produto?');">
+                                <button type="submit" class="btn btn-sm btn-danger btn-action">
+                                    <i class="bi bi-trash"></i> Deletar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox"></i> Nenhum produto encontrado
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Paginação -->
+    {% if paginated.pages > 1 %}
+    <div class="card-footer">
+        <nav aria-label="Paginação">
+            <ul class="pagination mb-0">
+                {% if paginated.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('produtos.listar', page=1, search=search, sort=sort_by, order=order) }}">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('produtos.listar', page=paginated.prev_num, search=search, sort=sort_by, order=order) }}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in paginated.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == paginated.page %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('produtos.listar', page=page_num, search=search, sort=sort_by, order=order) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if paginated.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('produtos.listar', page=paginated.next_num, search=search, sort=sort_by, order=order) }}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('produtos.listar', page=paginated.pages, search=search, sort=sort_by, order=order) }}">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Partidas - Sistema de Estoque{% endblock %}
+{% block page_title %}Gerenciamento de Partidas{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-boxes"></i> Partidas</h5>
+        <a href="{{ url_for('partidas.novo') }}" class="btn btn-sm btn-success">
+            <i class="bi bi-plus-circle"></i> Nova Partida
+        </a>
+    </div>
+    
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="GET" action="{{ url_for('partidas.listar') }}" class="d-flex gap-2">
+                    <div class="search-box flex-grow-1">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" class="form-control" placeholder="Buscar..." value="{{ search }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="search_type" onchange="location.href='{{ url_for('partidas.listar') }}?search_type=' + this.value">
+                    <option value="partida" {% if search_type == 'partida' %}selected{% endif %}>Buscar por Partida</option>
+                    <option value="produto" {% if search_type == 'produto' %}selected{% endif %}>Buscar por Produto</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID Partida</th>
+                    <th>Código do Produto</th>
+                    <th>Descrição</th>
+                    <th>Data de Criação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if partidas %}
+                    {% for partida in partidas %}
+                    <tr>
+                        <td><strong>{{ partida.id_partida }}</strong></td>
+                        <td>{{ partida.produto.codigo }}</td>
+                        <td>{{ partida.produto.descricao }}</td>
+                        <td><small>{{ partida.data_criacao.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                        <td>
+                            <a href="{{ url_for('partidas.editar', id=partida.id) }}" class="btn btn-sm btn-warning btn-action">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form method="POST" action="{{ url_for('partidas.deletar', id=partida.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar esta partida?');">
+                                <button type="submit" class="btn btn-sm btn-danger btn-action">
+                                    <i class="bi bi-trash"></i> Deletar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox"></i> Nenhuma partida encontrada
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

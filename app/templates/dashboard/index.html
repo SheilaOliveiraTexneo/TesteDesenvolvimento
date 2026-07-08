@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Sistema de Estoque{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <!-- Total de Solicitações -->
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-clipboard-check" style="font-size: 32px; color: #0d6efd;"></i>
+                <h5 class="card-title mt-3">Total de Solicitações</h5>
+                <h2 class="card-text" style="color: #0d6efd;">{{ total_solicitacoes }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Solicitado -->
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-hourglass-split" style="font-size: 32px; color: #0dcaf0;"></i>
+                <h5 class="card-title mt-3">Solicitado</h5>
+                <h2 class="card-text" style="color: #0dcaf0;">{{ solicitado }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Em Atendimento -->
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-arrow-repeat" style="font-size: 32px; color: #ffc107;"></i>
+                <h5 class="card-title mt-3">Em Atendimento</h5>
+                <h2 class="card-text" style="color: #ffc107;">{{ em_atendimento }}</h2>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Finalizado -->
+    <div class="col-md-3 col-sm-6 mb-3">
+        <div class="card">
+            <div class="card-body text-center">
+                <i class="bi bi-check-circle" style="font-size: 32px; color: #198754;"></i>
+                <h5 class="card-title mt-3">Finalizado</h5>
+                <h2 class="card-text" style="color: #198754;">{{ finalizado }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Prioridades -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up"></i> Solicitações por Prioridade</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-danger"><i class="bi bi-exclamation-circle"></i> Prioridade 1</h6>
+                            <h3 class="text-danger">{{ por_prioridade.prioridade_1 }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-warning"><i class="bi bi-exclamation-triangle"></i> Prioridade 2</h6>
+                            <h3 class="text-warning">{{ por_prioridade.prioridade_2 }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 style="color: #fd7e14;"><i class="bi bi-exclamation"></i> Prioridade 3</h6>
+                            <h3 style="color: #fd7e14;">{{ por_prioridade.prioridade_3 }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-info"><i class="bi bi-info-circle"></i> Prioridade 4</h6>
+                            <h3 class="text-info">{{ por_prioridade.prioridade_4 }}</h3>
+                        </div>
+                    </div>
+                    <div class="col-md-2 col-sm-4 col-6 mb-3">
+                        <div class="p-3 bg-light rounded">
+                            <h6 class="text-success"><i class="bi bi-check-circle"></i> Prioridade 5</h6>
+                            <h3 class="text-success">{{ por_prioridade.prioridade_5 }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimas Solicitações -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-clock-history"></i> Últimas Solicitações</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Solicitante</th>
+                            <th>Prioridade</th>
+                            <th>Status</th>
+                            <th>Data</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if ultimas_solicitacoes %}
+                            {% for sol in ultimas_solicitacoes %}
+                            <tr>
+                                <td><strong>{{ sol.id_solicitacao }}</strong></td>
+                                <td>{{ sol.produto.codigo }} - {{ sol.produto.descricao }}</td>
+                                <td>{{ sol.solicitante.nome }}</td>
+                                <td>
+                                    <span class="badge badge-priority-{{ sol.prioridade }}">
+                                        P{{ sol.prioridade }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if sol.status == 'solicitado' %}
+                                        <span class="badge bg-primary">Solicitado</span>
+                                    {% elif sol.status == 'em_atendimento' %}
+                                        <span class="badge bg-warning text-dark">Em Atendimento</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Finalizado</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ sol.data_solicitacao.strftime('%d/%m/%Y %H:%M') }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox"></i> Nenhuma solicitação registrada
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="card-footer text-center">
+                <a href="{{ url_for('solicitacoes.listar') }}" class="btn btn-sm btn-primary">
+                    Ver Todas as Solicitações
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

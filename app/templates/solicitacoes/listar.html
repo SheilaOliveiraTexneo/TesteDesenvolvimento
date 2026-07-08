@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitações de Estoque - Sistema de Estoque{% endblock %}
+{% block page_title %}Solicitações de Estoque{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-clipboard-check"></i> Solicitações</h5>
+        <div>
+            <a href="{{ url_for('solicitacoes.nova') }}" class="btn btn-sm btn-success">
+                <i class="bi bi-plus-circle"></i> Nova Solicitação
+            </a>
+            <a href="{{ url_for('solicitacoes.exportar_excel') }}" class="btn btn-sm btn-info">
+                <i class="bi bi-download"></i> Exportar Excel
+            </a>
+        </div>
+    </div>
+    
+    <div class="card-body">
+        <!-- Filtros e Busca -->
+        <div class="row mb-4">
+            <div class="col-md-5">
+                <form method="GET" action="{{ url_for('solicitacoes.listar') }}" class="d-flex gap-2">
+                    <div class="search-box flex-grow-1">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" class="form-control" placeholder="Buscar ID, produto ou solicitante..." value="{{ search }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i> Buscar
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="status" onchange="location.href='{{ url_for('solicitacoes.listar') }}?status=' + this.value + '&prioridade={{ prioridade }}'">
+                    <option value="">Todos os Status</option>
+                    <option value="solicitado" {% if status == 'solicitado' %}selected{% endif %}>Solicitado</option>
+                    <option value="em_atendimento" {% if status == 'em_atendimento' %}selected{% endif %}>Em Atendimento</option>
+                    <option value="finalizado" {% if status == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <select class="form-select" name="prioridade" onchange="location.href='{{ url_for('solicitacoes.listar') }}?status={{ status }}&prioridade=' + this.value">
+                    <option value="">Todas as Prioridades</option>
+                    <option value="1" {% if prioridade == '1' %}selected{% endif %}>Prioridade 1</option>
+                    <option value="2" {% if prioridade == '2' %}selected{% endif %}>Prioridade 2</option>
+                    <option value="3" {% if prioridade == '3' %}selected{% endif %}>Prioridade 3</option>
+                    <option value="4" {% if prioridade == '4' %}selected{% endif %}>Prioridade 4</option>
+                    <option value="5" {% if prioridade == '5' %}selected{% endif %}>Prioridade 5</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" onchange="location.href='{{ url_for('solicitacoes.listar') }}?sort=' + this.value + '&order={{ order }}'">
+                    <option value="id_solicitacao" {% if sort_by == 'id_solicitacao' %}selected{% endif %}>Ordenar por ID</option>
+                    <option value="data_solicitacao" {% if sort_by == 'data_solicitacao' %}selected{% endif %}>Ordenar por Data</option>
+                    <option value="prioridade" {% if sort_by == 'prioridade' %}selected{% endif %}>Ordenar por Prioridade</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tabela -->
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>ID</th>
+                    <th>Partida</th>
+                    <th>Produto</th>
+                    <th>Solicitante</th>
+                    <th>Prioridade</th>
+                    <th>Status</th>
+                    <th>Data</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if solicitacoes %}
+                    {% for sol in solicitacoes %}
+                    <tr>
+                        <td><strong>{{ sol.id_solicitacao }}</strong></td>
+                        <td>{{ sol.partida.id_partida }}</td>
+                        <td>{{ sol.produto.codigo }}<br><small class="text-muted">{{ sol.produto.descricao }}</small></td>
+                        <td>{{ sol.solicitante.nome }}</td>
+                        <td>
+                            <span class="badge badge-priority-{{ sol.prioridade }}">
+                                P{{ sol.prioridade }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if sol.status == 'solicitado' %}
+                                <span class="badge bg-primary">Solicitado</span>
+                            {% elif sol.status == 'em_atendimento' %}
+                                <span class="badge bg-warning text-dark">Em Atendimento</span>
+                            {% else %}
+                                <span class="badge bg-success">Finalizado</span>
+                            {% endif %}
+                        </td>
+                        <td><small>{{ sol.data_solicitacao.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                        <td>
+                            <a href="{{ url_for('solicitacoes.editar', id=sol.id) }}" class="btn btn-sm btn-warning btn-action">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            {% if current_user.tem_permissao('deletar_solicitacao') %}
+                            <form method="POST" action="{{ url_for('solicitacoes.deletar', id=sol.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar esta solicitação?');">
+                                <button type="submit" class="btn btn-sm btn-danger btn-action">
+                                    <i class="bi bi-trash"></i> Deletar
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox"></i> Nenhuma solicitação encontrada
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Paginação -->
+    {% if paginated.pages > 1 %}
+    <div class="card-footer">
+        <nav aria-label="Paginação">
+            <ul class="pagination mb-0">
+                {% if paginated.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('solicitacoes.listar', page=1, search=search, status=status, prioridade=prioridade, sort=sort_by, order=order) }}">
+                            <i class="bi bi-chevron-double-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in paginated.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num == paginated.page %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('solicitacoes.listar', page=page_num, search=search, status=status, prioridade=prioridade, sort=sort_by, order=order) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                
+                {% if paginated.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('solicitacoes.listar', page=paginated.next_num, search=search, status=status, prioridade=prioridade, sort=sort_by, order=order) }}">
+                            <i class="bi bi-chevron-double-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

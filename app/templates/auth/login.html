@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Login - Sistema de Estoque{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center align-items-center" style="min-height: 100vh;">
+        <div class="col-md-5">
+            <div class="card shadow-lg">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-box2-heart" style="font-size: 48px; color: #0d6efd;"></i>
+                        <h3 class="mt-3 mb-2">Sistema de Estoque</h3>
+                        <p class="text-muted">Controle de Solicitações</p>
+                    </div>
+                    
+                    <form method="POST" action="{{ url_for('auth.login') }}">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control form-control-lg" id="email" name="email" required>
+                            <small class="text-muted d-block mt-2">Emails padrão:
+                                <br>admin@estoque.com
+                                <br>operador@estoque.com
+                                <br>consulta@estoque.com
+                            </small>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label">Senha</label>
+                            <input type="password" class="form-control form-control-lg" id="password" name="password" required>
+                            <small class="text-muted d-block mt-2">Senhas padrão: admin123 / operador123 / consulta123</small>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Entrar
+                        </button>
+                    </form>
+                    
+                    <hr>
+                    
+                    <div class="alert alert-info" role="alert">
+                        <h6 class="alert-heading"><i class="bi bi-info-circle"></i> Usuários de Teste</h6>
+                        <small>
+                            <strong>Admin:</strong> admin@estoque.com / admin123<br>
+                            <strong>Operador:</strong> operador@estoque.com / operador123<br>
+                            <strong>Consulta:</strong> consulta@estoque.com / consulta123
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

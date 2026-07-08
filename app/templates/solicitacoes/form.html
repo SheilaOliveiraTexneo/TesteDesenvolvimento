@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}{% if solicitacao %}Editar{% else %}Nova{% endif %} Solicitação - Sistema de Estoque{% endblock %}
+{% block page_title %}{% if solicitacao %}Editar Solicitação{% else %}Nova Solicitação{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-group {
+        margin-bottom: 20px;
+    }
+    .auto-fill {
+        background-color: #f0f0f0;
+        padding: 10px;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if solicitacao %}
+                        <i class="bi bi-pencil"></i> Editar Solicitação #{{ solicitacao.id_solicitacao }}
+                    {% else %}
+                        <i class="bi bi-plus-circle"></i> Nova Solicitação
+                    {% endif %}
+                </h5>
+            </div>
+            
+            <form method="POST" class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="id_partida" class="form-label">ID da Partida <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="id_partida" name="id_partida" required value="{{ solicitacao.partida.id_partida if solicitacao else '' }}">
+                            <small class="text-muted">Digite o ID da partida</small>
+                        </div>
+                        
+                        <div class="auto-fill" id="produto_info" style="display: none;">
+                            <strong>Produto:</strong> <span id="produto_codigo"></span><br>
+                            <strong>Descrição:</strong> <span id="produto_descricao"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="codigo_solicitante" class="form-label">Código do Solicitante <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="codigo_solicitante" name="codigo_solicitante" required value="{{ solicitacao.solicitante.codigo if solicitacao else '' }}">
+                            <small class="text-muted">Digite o código do solicitante</small>
+                        </div>
+                        
+                        <div class="auto-fill" id="solicitante_info" style="display: none;">
+                            <strong>Solicitante:</strong> <span id="solicitante_nome"></span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="prioridade" class="form-label">Prioridade <span class="text-danger">*</span></label>
+                            <select class="form-select" id="prioridade" name="prioridade" required>
+                                <option value="1" {% if solicitacao and solicitacao.prioridade == 1 %}selected{% endif %}>1 - Urgente (Vermelho)</option>
+                                <option value="2" {% if solicitacao and solicitacao.prioridade == 2 %}selected{% endif %}>2 - Muito Alta (Laranja)</option>
+                                <option value="3" {% if solicitacao and solicitacao.prioridade == 3 %}selected{% elif not solicitacao %}selected{% endif %}>3 - Alta (Amarelo)</option>
+                                <option value="4" {% if solicitacao and solicitacao.prioridade == 4 %}selected{% endif %}>4 - Média (Azul)</option>
+                                <option value="5" {% if solicitacao and solicitacao.prioridade == 5 %}selected{% endif %}>5 - Baixa (Verde)</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="numero_rocas" class="form-label">Número de Rocas</label>
+                            <input type="number" class="form-control" id="numero_rocas" name="numero_rocas" value="{{ solicitacao.numero_rocas if solicitacao else '' }}">
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label for="lote" class="form-label">Lote</label>
+                            <input type="text" class="form-control" id="lote" name="lote" value="{{ solicitacao.lote if solicitacao else '' }}">
+                        </div>
+                    </div>
+                </div>
+                
+                {% if solicitacao %}
+                <div class="form-group">
+                    <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                    <select class="form-select" id="status" name="status" required>
+                        <option value="solicitado" {% if solicitacao.status == 'solicitado' %}selected{% endif %}>Solicitado</option>
+                        <option value="em_atendimento" {% if solicitacao.status == 'em_atendimento' %}selected{% endif %}>Em Atendimento</option>
+                        <option value="finalizado" {% if solicitacao.status == 'finalizado' %}selected{% endif %}>Finalizado</option>
+                    </select>
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="observacoes" class="form-label">Observações</label>
+                    <textarea class="form-control" id="observacoes" name="observacoes" rows="4">{{ solicitacao.observacoes if solicitacao else '' }}</textarea>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Salvar
+                    </button>
+                    <a href="{{ url_for('solicitacoes.listar') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-preencher partida
+document.getElementById('id_partida').addEventListener('change', function() {
+    const idPartida = this.value;
+    if (idPartida) {
+        fetch(`/partidas/api/buscar/${idPartida}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.produto_codigo) {
+                    document.getElementById('produto_codigo').textContent = data.produto_codigo;
+                    document.getElementById('produto_descricao').textContent = data.produto_descricao;
+                    document.getElementById('produto_info').style.display = 'block';
+                } else {
+                    document.getElementById('produto_info').style.display = 'none';
+                    alert('Partida não encontrada');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('produto_info').style.display = 'none';
+            });
+    } else {
+        document.getElementById('produto_info').style.display = 'none';
+    }
+});
+
+// Auto-preencher solicitante
+document.getElementById('codigo_solicitante').addEventListener('change', function() {
+    const codigoSolicitante = this.value;
+    if (codigoSolicitante) {
+        fetch(`/solicitantes/api/buscar/${codigoSolicitante}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.nome) {
+                    document.getElementById('solicitante_nome').textContent = data.nome;
+                    document.getElementById('solicitante_info').style.display = 'block';
+                } else {
+                    document.getElementById('solicitante_info').style.display = 'none';
+                    alert('Solicitante não encontrado');
+                }
+            })
+            .catch(error => {
+                console.error('Erro:', error);
+                document.getElementById('solicitante_info').style.display = 'none';
+            });
+    } else {
+        document.getElementById('solicitante_info').style.display = 'none';
+    }
+});
+
+// Disparar eventos ao carregar página
+window.addEventListener('load', function() {
+    const idPartidaEvent = new Event('change');
+    document.getElementById('id_partida').dispatchEvent(idPartidaEvent);
+    
+    const codigoSolicitanteEvent = new Event('change');
+    document.getElementById('codigo_solicitante').dispatchEvent(codigoSolicitanteEvent);
+});
+</script>
+{% endblock %}

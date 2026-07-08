@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}Fila de Atendimento - Sistema de Estoque{% endblock %}
+{% block page_title %}Fila de Atendimento{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-hourglass-split"></i> Solicitado
+                    <span class="badge bg-primary float-end">{{ solicitado|length }}</span>
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Prioridade</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if solicitado %}
+                            {% for sol in solicitado %}
+                            <tr>
+                                <td><strong>{{ sol.id_solicitacao }}</strong></td>
+                                <td>
+                                    <small>{{ sol.produto.codigo }}<br>{{ sol.solicitante.nome }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-priority-{{ sol.prioridade }}">
+                                        P{{ sol.prioridade }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('solicitacoes.editar', id=sol.id) }}" class="btn btn-sm btn-primary btn-action">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox"></i> Nenhuma solicitação
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="bi bi-arrow-repeat"></i> Em Atendimento
+                    <span class="badge bg-warning float-end">{{ em_atendimento|length }}</span>
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>Produto</th>
+                            <th>Prioridade</th>
+                            <th>Ação</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if em_atendimento %}
+                            {% for sol in em_atendimento %}
+                            <tr>
+                                <td><strong>{{ sol.id_solicitacao }}</strong></td>
+                                <td>
+                                    <small>{{ sol.produto.codigo }}<br>{{ sol.solicitante.nome }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge badge-priority-{{ sol.prioridade }}">
+                                        P{{ sol.prioridade }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <a href="{{ url_for('solicitacoes.editar', id=sol.id) }}" class="btn btn-sm btn-primary btn-action">
+                                        <i class="bi bi-pencil"></i> Editar
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">
+                                    <i class="bi bi-inbox"></i> Nenhuma solicitação
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Ordenação</h5>
+    </div>
+    <div class="card-body">
+        <p class="mb-0">As solicitações são automaticamente ordenadas por:
+            <ol>
+                <li><strong>Status</strong> - Solicitado → Em Atendimento → Finalizado</li>
+                <li><strong>Prioridade</strong> - De 1 (Urgente) a 5 (Baixa)</li>
+                <li><strong>Data</strong> - Mais antigas primeiro</li>
+            </ol>
+        </p>
+    </div>
+</div>
+{% endblock %}

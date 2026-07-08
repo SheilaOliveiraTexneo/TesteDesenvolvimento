@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}{% if partida %}Editar{% else %}Nova{% endif %} Partida - Sistema de Estoque{% endblock %}
+{% block page_title %}{% if partida %}Editar Partida{% else %}Nova Partida{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    {% if partida %}
+                        <i class="bi bi-pencil"></i> Editar Partida
+                    {% else %}
+                        <i class="bi bi-plus-circle"></i> Nova Partida
+                    {% endif %}
+                </h5>
+            </div>
+            
+            <form method="POST" class="card-body">
+                <div class="mb-3">
+                    <label for="id_partida" class="form-label">ID da Partida <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="id_partida" name="id_partida" required value="{{ partida.id_partida if partida else '' }}">
+                </div>
+                
+                <div class="mb-3">
+                    <label for="produto_codigo" class="form-label">Código do Produto <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" id="produto_codigo" name="produto_codigo" required value="{{ partida.produto.codigo if partida else '' }}">
+                    <small class="text-muted">Digite o código do produto para vincular à partida</small>
+                </div>
+                
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-check-circle"></i> Salvar
+                    </button>
+                    <a href="{{ url_for('partidas.listar') }}" class="btn btn-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

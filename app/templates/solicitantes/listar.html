@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Solicitantes - Sistema de Estoque{% endblock %}
+{% block page_title %}Gerenciamento de Solicitantes{% endblock %}
+
+{% block content %}
+<div class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="bi bi-people"></i> Solicitantes</h5>
+        <a href="{{ url_for('solicitantes.novo') }}" class="btn btn-sm btn-success">
+            <i class="bi bi-plus-circle"></i> Novo Solicitante
+        </a>
+    </div>
+    
+    <div class="card-body">
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <form method="GET" action="{{ url_for('solicitantes.listar') }}" class="d-flex gap-2">
+                    <div class="search-box flex-grow-1">
+                        <i class="bi bi-search"></i>
+                        <input type="text" name="search" class="form-control" placeholder="Buscar..." value="{{ search }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-search"></i>
+                    </button>
+                </form>
+            </div>
+            <div class="col-md-3">
+                <select class="form-select" name="search_type" onchange="location.href='{{ url_for('solicitantes.listar') }}?search_type=' + this.value">
+                    <option value="codigo" {% if search_type == 'codigo' %}selected{% endif %}>Buscar por Código</option>
+                    <option value="nome" {% if search_type == 'nome' %}selected{% endif %}>Buscar por Nome</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Código</th>
+                    <th>Nome</th>
+                    <th>Data de Criação</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if solicitantes %}
+                    {% for solicitante in solicitantes %}
+                    <tr>
+                        <td><strong>{{ solicitante.codigo }}</strong></td>
+                        <td>{{ solicitante.nome }}</td>
+                        <td><small>{{ solicitante.data_criacao.strftime('%d/%m/%Y %H:%M') }}</small></td>
+                        <td>
+                            <a href="{{ url_for('solicitantes.editar', id=solicitante.id) }}" class="btn btn-sm btn-warning btn-action">
+                                <i class="bi bi-pencil"></i> Editar
+                            </a>
+                            <form method="POST" action="{{ url_for('solicitantes.deletar', id=solicitante.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este solicitante?');">
+                                <button type="submit" class="btn btn-sm btn-danger btn-action">
+                                    <i class="bi bi-trash"></i> Deletar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-4">
+                            <i class="bi bi-inbox"></i> Nenhum solicitante encontrado
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
